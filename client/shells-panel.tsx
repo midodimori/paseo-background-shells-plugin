@@ -154,8 +154,9 @@ export function ShellsPanel({ theme, layout, agentId }: PluginAgentPanelProps) {
             <View style={styles.note} accessibilityRole="alert">
               <Icon name="TriangleAlert" size={16} color={theme.colors.statusWarning} />
               <Text style={styles.noteText}>
-                The agent is idle, but {running === 1 ? "this shell is" : "these shells are"} still running. They
-                stop when the agent is archived.
+                {running === 1
+                  ? "The agent is idle, but this shell is still running. It stops when the agent is archived."
+                  : "The agent is idle, but these shells are still running. They stop when the agent is archived."}
               </Text>
             </View>
           ) : null}
