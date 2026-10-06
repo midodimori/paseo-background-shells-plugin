@@ -1,0 +1,7 @@
+{
+  "id": "paseo-background-shells",
+  "description": "Shows each Claude Code agent's background shells: a composer pill, a panel with live output, and an Ask to stop button",
+  "requirements": {
+    "paseo": ">=0.9.0"
+  }
+}
