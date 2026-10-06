@@ -128,8 +128,9 @@ No plugin was installed and the daemon was not touched.
   0.11 betas only add (`registerUsageSource`, usage sources). The Claude
   task-notification mapper did not change between 0.9.1 and 0.10.3 either.
 - Set `requirements.paseo` to `">=0.9.0"`. `paseo plugin init` would write
-  `>=0.10.3` (CLI version), which the 0.9.1 daemon rejects. Pin the
-  `@getpaseo/plugin` dev dependency to `0.9.1` to match the daemon (npm has it).
+  `>=0.10.3` (CLI version), which the 0.9.1 daemon rejects. ~~Pin the
+  `@getpaseo/plugin` dev dependency to `0.9.1`.~~ Superseded by the user: no
+  pins, see "Build results".
 - `addComposerPill({ id, workspaceId, agentId, button })` returns
   `{ update, remove }`; `button` = `{ title, icon, label?, visible?, disabled?,
   behavior }`. `icon` may be a component (`PluginButtonIconProps`) for a
@@ -187,8 +188,15 @@ End notifications differ between the live stream and rebuilt history:
 ### 3. Timeout and Ctrl+B cases
 
 - Foreground Bash with `timeout: 4000`: killed at 4 s, `item.status: "failed"`,
-  `error.content: "Exit code 143\nCommand timed out after 4s"`. **Not
-  auto-backgrounded** (Claude Code 2.1.284 under Paseo). Nothing to track.
+  `error.content: "Exit code 143\nCommand timed out after 4s"`. Not
+  auto-backgrounded.
+- **Correction (found during the build):** a foreground Bash with `timeout:
+  90000` that outlived it *was* moved to the background, with different start
+  text: `Command did not complete within its 90s timeout and was moved to the
+  background (ID: <taskId>). Output is being written to: <path>. ...` It then
+  ends with a normal `task_notification`. Why 4 s was killed and 90 s was
+  backgrounded is not known (a minimum timeout is likely). The parser handles both
+  texts; fixture `tests/fixtures/timeout-backgrounded-entries.json`.
 - Ctrl+B: Paseo drives Claude Code through the SDK, not a TUI. In the Paseo app,
   Ctrl+B toggles the left sidebar (`keyboard-shortcuts.ts:917`). There is no way
   to background a running command, so this case does not exist.
@@ -246,15 +254,14 @@ Server owns the state; client polls.
   context panel that polls `shells.list` and the selected shell's `shells.tail`.
 - **Ask to stop:** `paseo.agents.ref(agentId).send("Use TaskStop to stop
   background task <id> (<desc or command>). Reply briefly.")`. Shown only for
-  `running` shells. **Not yet measured:** what `send` does while the agent is
-  mid-turn (queue or interrupt). Check this in build step 4 before choosing the
-  button state.
+  `running` shells. Measured in the build: `send` while the agent is mid-turn
+  **interrupts** it (see "Build results").
 
 ## Proposed file layout
 
 ```text
 paseo-plugin.json        id "paseo-background-shells", requirements.paseo ">=0.9.0"
-package.json             devDeps: @getpaseo/plugin 0.9.1, zod, typescript; scripts typecheck/test
+package.json             devDeps: @getpaseo/plugin >=0.9.0, zod, typescript; scripts typecheck/test
 tsconfig.json
 README.md
 index.server.ts          handle shells.summary/list/tail; on(agent.created|turn_started) → tracker.start(paseo)
@@ -271,7 +278,7 @@ server/
                          replacement/restore, closed/archived → ended(unknown)
   output-tail.ts         realpath root check, last-N-KB read, footer parse
 client/
-  pills.tsx              directory observation → addComposerPill per agent, poll summary
+  pills.ts               directory observation → addComposerPill per agent, poll summary
   shells-panel.tsx       list (status, elapsed, exit code), tail view, Ask to stop
   format.ts              elapsed time, status label/colour from theme.colors
 tests/
@@ -287,11 +294,43 @@ test framework dependency). Relative imports then need `.ts` extensions and
 `allowImportingTsExtensions` in tsconfig; confirm the Paseo bundler accepts that
 during build step 1, else add `tsx` as a dev dependency.
 
+## Build results (2026-10-06)
+
+Built, installed on the 0.9.1 daemon (`paseo plugin ls`: `running`), and
+exercised in the Paseo web app (app.paseo.sh, connected to the local daemon)
+at desktop width, at 390 px, and in the Dark theme.
+
+- **No version pins (user decision).** `requirements.paseo` is `">=0.9.0"` with
+  no upper bound, and `@getpaseo/plugin` is a `">=0.9.0"` dev dependency (it is
+  only for typechecking; the host supplies runtime modules). Caret ranges were
+  avoided because `^0.9.x` locks the minor version. npm currently resolves
+  0.10.3; the code also typechecks against `@getpaseo/plugin@0.9.1` in a scratch
+  copy. Use only APIs that exist in 0.9.x.
+- **0.9.1 has no `agent.closed` hook** (the current docs list one). Closed
+  sessions are detected from the directory snapshot `status: "closed"`.
+- **`send()` mid-turn interrupts.** Measured on test agent `7090b4a6`: the
+  running turn ends with `turn_canceled` (`reason: "Interrupted"`), its in-flight
+  foreground tool call is canceled (and emits a foreground `task_notification`,
+  which the reducer ignores), and a new turn starts with the prompt. Background
+  shells survive the interrupt. `PaseoAgentSendOptions` in 0.9.1 has no queue
+  option (the app's Cmd/Ctrl+Enter queue is app-side). An idle agent starts a
+  new turn immediately.
+- **Ask to stop behavior:** idle (or errored) agent → **Ask to stop** sends at
+  once. Running agent → **Interrupt to stop** in the danger color; the first
+  press arms **Interrupt agent and stop?** for 4 s, the second sends. Closed
+  session → no button. After sending: **Stop requested** until the status
+  changes. Both paths stopped the shell within about 2 to 12 s in testing.
+- **Node type stripping** rejects TypeScript parameter properties.
+  `erasableSyntaxOnly` is on in tsconfig so typecheck catches it.
+- **Panel order:** running shells first, then newest first. The running dot is
+  hollow, because accent and success are both green in the default theme.
+- Paseo's esbuild bundler accepts `.ts` import extensions, so no `tsx` dependency.
+
 ## Build order (after go-ahead)
 
 1. `paseo plugin init` into this repo; set `requirements.paseo` to `">=0.9.0"`
-   (init writes `>=0.10.3`, which the 0.9.1 daemon rejects) and pin
-   `@getpaseo/plugin` to `0.9.1`.
+   (init writes `>=0.10.3`, which the 0.9.1 daemon rejects). ~~Pin
+   `@getpaseo/plugin` to `0.9.1`.~~ Open `>=0.9.0` range instead.
 2. `shared/`: Zod contracts (`shells.list`, `shells.tail`), shell-state types,
    and the start/end text parsers with fixture tests.
 3. `server/`: timeline tracking, output tail with path restriction.
