@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { applyTimelineItem, createAgentShells, resolveShell, type AgentShells } from "../server/reduce.ts";
-import { historyEntries, liveItems } from "./helpers.ts";
+import { historyEntries, liveItems, timeoutEntries } from "./helpers.ts";
 
 const open = { footer: null, footerAt: null, sessionEnded: false };
 
@@ -127,3 +127,13 @@ test("resolve: an ended session with no other signal shows ended, not running", 
 function pick(shell: ReturnType<typeof resolveShell>) {
   return [shell.status, shell.exitCode, shell.endedAt];
 }
+
+test("a timed-out command counts its foreground time in startedAt", () => {
+  const state = createAgentShells();
+  for (const { item, timestamp } of timeoutEntries) applyTimelineItem(state, item, timestamp);
+  const shell = state.shells.get("bgecvpv1q");
+  assert.equal(shell?.startedAt, "2026-10-06T15:59:57.318Z");
+  assert.deepEqual(statuses(state), {
+    bgecvpv1q: ["failed", 144, "Wait for the stop turn to finish and show it"],
+  });
+});

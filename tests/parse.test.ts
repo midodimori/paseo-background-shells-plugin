@@ -6,7 +6,7 @@ import {
   parseTaskNotification,
   parseTaskStop,
 } from "../server/parse.ts";
-import { historyEntries, lastLive, liveItems, metadataTaskId } from "./helpers.ts";
+import { historyEntries, lastLive, liveItems, metadataTaskId, timeoutEntries } from "./helpers.ts";
 
 const TASKS_DIR =
   "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks";
@@ -18,7 +18,35 @@ test("parses the background start text from a completed Bash call", () => {
     toolUseId: "toolu_018mrHgE4rALtXGmrZcj3XDC",
     command: "for i in 1 2 3 4 5 6 7 8; do echo tick $i; sleep 3; done",
     outputFile: `${TASKS_DIR}/brag50qof.output`,
+    ranForegroundMs: 0,
   });
+});
+
+test("parses a foreground command that timed out and moved to the background", () => {
+  const start = parseBackgroundStart(timeoutEntries[0].item);
+  assert.equal(start?.taskId, "bgecvpv1q");
+  assert.equal(start?.toolUseId, "toolu_01RHWSyqZZzrzXsiMY9Fn3sW");
+  assert.equal(start?.ranForegroundMs, 90_000);
+  assert.equal(
+    start?.outputFile,
+    "/private/tmp/claude-501/-Users-me-dev-project/22222222-2222-4222-8222-222222222222/tasks/bgecvpv1q.output",
+  );
+  assert.deepEqual(parseTaskNotification(timeoutEntries[1].item), {
+    taskId: "bgecvpv1q",
+    toolUseId: "toolu_01RHWSyqZZzrzXsiMY9Fn3sW",
+    status: "failed",
+    exitCode: 144,
+    description: "Wait for the stop turn to finish and show it",
+  });
+});
+
+test("ignores shell output that only mentions background tasks", () => {
+  const echoed = {
+    type: "tool_call",
+    callId: "toolu_echo",
+    detail: { type: "shell", command: "cat notes", output: "notes: Command running in background with ID: x." },
+  };
+  assert.equal(parseBackgroundStart(echoed), null);
 });
 
 test("ignores Bash calls that are still running or ran in the foreground", () => {

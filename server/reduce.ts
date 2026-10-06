@@ -52,10 +52,11 @@ export function applyTimelineItem(state: AgentShells, item: unknown, timestamp: 
     if (existing) return;
     const pending = state.pendingEnds.get(start.taskId);
     state.pendingEnds.delete(start.taskId);
+    const { ranForegroundMs, ...shell } = start;
     state.shells.set(start.taskId, {
-      ...start,
+      ...shell,
       description: pending?.description ?? null,
-      startedAt: timestamp,
+      startedAt: shiftTimestamp(timestamp, -ranForegroundMs),
       end: pending?.end ?? null,
     });
     return;
@@ -103,4 +104,9 @@ export function resolveShell(shell: ShellRecord, context: ResolveContext): Shell
   }
   if (context.sessionEnded) return { ...base, status: "ended", exitCode: null, endedAt: null };
   return { ...base, status: "running", exitCode: null, endedAt: null };
+}
+
+function shiftTimestamp(timestamp: string, ms: number): string {
+  const time = Date.parse(timestamp);
+  return ms === 0 || Number.isNaN(time) ? timestamp : new Date(time + ms).toISOString();
 }

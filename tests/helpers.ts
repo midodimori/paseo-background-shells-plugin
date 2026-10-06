@@ -18,6 +18,8 @@ function readFixture<T>(name: string): T {
 
 export const liveUpdates = readFixture<LiveUpdate[]>("live-updates.json");
 export const historyEntries = readFixture<HistoryEntry[]>("history-entries.json");
+// A foreground Bash call in another Paseo agent that hit its 90 s timeout.
+export const timeoutEntries = readFixture<HistoryEntry[]>("timeout-backgrounded-entries.json");
 
 export function liveItems(): { item: Record<string, unknown>; timestamp: string }[] {
   return liveUpdates.flatMap((update) =>

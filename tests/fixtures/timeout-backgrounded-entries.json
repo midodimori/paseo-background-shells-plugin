@@ -1,0 +1,67 @@
+[
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01RHWSyqZZzrzXsiMY9Fn3sW",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "cd /tmp/bgshells-probe && until [ $(grep -c turn_completed live2.ndjson) -ge 3 ]; do sleep 1; done; python3 summarize.py live2.ndjson | grep -v \"running.*out='None'\" | sed -n '/15:59:48.834/,$p' | cut -c1-260",
+        "output": "Command did not complete within its 90s timeout and was moved to the background (ID: bgecvpv1q). Output is being written to: /private/tmp/claude-501/-Users-me-dev-project/22222222-2222-4222-8222-222222222222/tasks/bgecvpv1q.output. You will be notified when it completes. To check interim output, use Read on that file path.\nSession cwd remains /Users/me/dev/project; directory changes made by the backgrounded command do not apply to subsequent commands."
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T16:01:27.318Z",
+    "seqStart": 414,
+    "seqEnd": 415,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 414,
+        "endSeq": 415
+      }
+    ],
+    "turnId": "foreground-turn-2",
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_498c586f-af78-4ff0-8560-275477c9b15e",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"Wait for the stop turn to finish and show it\" failed with exit code 144",
+        "icon": "wrench",
+        "text": "Background command \"Wait for the stop turn to finish and show it\" failed with exit code 144"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "bgecvpv1q",
+        "toolUseId": "toolu_01RHWSyqZZzrzXsiMY9Fn3sW",
+        "status": "failed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/22222222-2222-4222-8222-222222222222/tasks/bgecvpv1q.output"
+      },
+      "status": "failed",
+      "error": {
+        "message": "Background command \"Wait for the stop turn to finish and show it\" failed with exit code 144"
+      }
+    },
+    "timestamp": "2026-10-06T16:01:52.115Z",
+    "seqStart": 425,
+    "seqEnd": 425,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 425,
+        "endSeq": 425
+      }
+    ],
+    "turnId": "foreground-turn-2",
+    "collapsed": []
+  }
+]

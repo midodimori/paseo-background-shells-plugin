@@ -8,6 +8,8 @@ export interface BackgroundStart {
   toolUseId: string;
   command: string;
   outputFile: string;
+  // A foreground command that hit its timeout ran this long before it was backgrounded.
+  ranForegroundMs: number;
 }
 
 export interface TaskNotification {
@@ -22,8 +24,11 @@ export interface TaskStop {
   taskId: string;
 }
 
-const BACKGROUND_START =
-  /^Command running in background with ID: (\S+?)\. Output is being written to: (.+?\.output)(?:\.|\s|$)/;
+// run_in_background: "Command running in background with ID: <id>. Output is being written to: <path>. ..."
+const BACKGROUND_START = /^Command running in background with ID: (\S+?)\./;
+// Timeout: "Command did not complete within its 90s timeout and was moved to the background (ID: <id>). ..."
+const TIMEOUT_START = /^Command did not complete within its (\d+)s timeout and was moved to the background \(ID: (\S+?)\)/;
+const OUTPUT_FILE = /Output is being written to: (.+?\.output)(?:\.|\s|$)/;
 const SUMMARY_DESCRIPTION = /^Background command "([\s\S]*)" (?:completed|failed|was stopped|was killed)\b/;
 const EXIT_CODE = /exit code (-?\d+)/;
 const FOOTER = /\n?\[(?:exited with code (-?\d+)|killed)\]\s*$/;
@@ -44,7 +49,7 @@ function toolCall(item: unknown): (JsonObject & { detail: JsonObject }) | null {
   return item as JsonObject & { detail: JsonObject };
 }
 
-/** A Bash call started with run_in_background, recognized by the tool result text. */
+/** A Bash call that runs in the background, recognized by its tool result text. */
 export function parseBackgroundStart(item: unknown): BackgroundStart | null {
   const call = toolCall(item);
   if (!call || call.detail.type !== "shell") return null;
@@ -52,9 +57,16 @@ export function parseBackgroundStart(item: unknown): BackgroundStart | null {
   const command = stringField(call.detail, "command");
   const toolUseId = stringField(call, "callId");
   if (!output || !command || !toolUseId) return null;
-  const match = BACKGROUND_START.exec(output.trimStart());
-  if (!match) return null;
-  return { taskId: match[1], toolUseId, command, outputFile: match[2] };
+  const text = output.trimStart();
+  const outputFile = OUTPUT_FILE.exec(text)?.[1];
+  if (!outputFile) return null;
+  const started = BACKGROUND_START.exec(text);
+  if (started) return { taskId: started[1], toolUseId, command, outputFile, ranForegroundMs: 0 };
+  const timedOut = TIMEOUT_START.exec(text);
+  if (timedOut) {
+    return { taskId: timedOut[2], toolUseId, command, outputFile, ranForegroundMs: Number(timedOut[1]) * 1000 };
+  }
+  return null;
 }
 
 function notificationStatus(raw: string | null, exitCode: number | null): TaskNotification["status"] {
