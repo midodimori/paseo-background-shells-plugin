@@ -1,0 +1,595 @@
+[
+  {
+    "provider": "claude",
+    "item": {
+      "type": "user_message",
+      "text": "Reply with just \"ready\". Do not run any tools.",
+      "messageId": "84b19687-f552-43a8-91a3-51a287b1aca4"
+    },
+    "timestamp": "2026-10-06T10:31:00.935Z",
+    "seqStart": 1,
+    "seqEnd": 1,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 1,
+        "endSeq": 1
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "ready",
+      "messageId": "deab7043-0adf-49f3-8e05-0f354bdccb64"
+    },
+    "timestamp": "2026-10-06T10:31:02.914Z",
+    "seqStart": 2,
+    "seqEnd": 2,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 2,
+        "endSeq": 2
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "user_message",
+      "text": "This is a test of background shells. Do exactly this, nothing else:\n1. Run with the Bash tool, run_in_background: true, description \"tick probe\": for i in 1 2 3 4 5 6 7 8; do echo tick $i; sleep 3; done\n2. Run with the Bash tool, run_in_background: true, description \"fail probe\": sleep 4; echo failing >&2; exit 3\nThen end your turn immediately with the reply \"started\". Do not wait for, read, or check the background tasks. When notifications arrive later, reply only \"noted\".",
+      "messageId": "c7cdd2ea-a2a0-4614-8b99-00b4c0332c5f"
+    },
+    "timestamp": "2026-10-06T10:31:17.751Z",
+    "seqStart": 3,
+    "seqEnd": 3,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 3,
+        "endSeq": 3
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_018mrHgE4rALtXGmrZcj3XDC",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "for i in 1 2 3 4 5 6 7 8; do echo tick $i; sleep 3; done",
+        "output": "Command running in background with ID: brag50qof. Output is being written to: /private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/brag50qof.output. You will be notified when it completes. To check interim output, use Read on that file path."
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:31:20.774Z",
+    "seqStart": 4,
+    "seqEnd": 5,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 4,
+        "endSeq": 5
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01CTFMYgH9FwUk242dabzpiP",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "sleep 4; echo failing >&2; exit 3",
+        "output": "Command running in background with ID: b83d7jga2. Output is being written to: /private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b83d7jga2.output. You will be notified when it completes. To check interim output, use Read on that file path."
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:31:21.066Z",
+    "seqStart": 6,
+    "seqEnd": 7,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 6,
+        "endSeq": 7
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_b83d7jga2",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"fail probe\" failed with exit code 3",
+        "icon": "wrench",
+        "text": "<task-notification>\n<task-id>b83d7jga2</task-id>\n<tool-use-id>toolu_01CTFMYgH9FwUk242dabzpiP</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b83d7jga2.output</output-file>\n<status>failed</status>\n<summary>Background command \"fail probe\" failed with exit code 3</summary>\n</task-notification>"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "b83d7jga2",
+        "toolUseId": "toolu_01CTFMYgH9FwUk242dabzpiP",
+        "status": "failed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b83d7jga2.output"
+      },
+      "status": "failed",
+      "error": {
+        "message": "Background command \"fail probe\" failed with exit code 3"
+      }
+    },
+    "timestamp": "2026-10-06T10:31:25.090Z",
+    "seqStart": 8,
+    "seqEnd": 8,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 8,
+        "endSeq": 8
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "started",
+      "messageId": "30dfd541-7a41-4a8a-95d5-e65ff785f2c5"
+    },
+    "timestamp": "2026-10-06T10:31:28.129Z",
+    "seqStart": 9,
+    "seqEnd": 9,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 9,
+        "endSeq": 9
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_4aa4ed47-7077-4475-a73a-bc70b264e42d",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"fail probe\" failed with exit code 3",
+        "icon": "wrench",
+        "text": "<task-notification>\n<task-id>b83d7jga2</task-id>\n<tool-use-id>toolu_01CTFMYgH9FwUk242dabzpiP</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b83d7jga2.output</output-file>\n<status>failed</status>\n<summary>Background command \"fail probe\" failed with exit code 3</summary>\n</task-notification>"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "b83d7jga2",
+        "toolUseId": "toolu_01CTFMYgH9FwUk242dabzpiP",
+        "status": "failed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b83d7jga2.output"
+      },
+      "status": "failed",
+      "error": {
+        "message": "Background command \"fail probe\" failed with exit code 3"
+      }
+    },
+    "timestamp": "2026-10-06T10:31:28.161Z",
+    "seqStart": 10,
+    "seqEnd": 10,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 10,
+        "endSeq": 10
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "noted",
+      "messageId": "114dd4e9-0d95-4f1c-9cfa-affeca9dc2d7"
+    },
+    "timestamp": "2026-10-06T10:31:29.960Z",
+    "seqStart": 11,
+    "seqEnd": 11,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 11,
+        "endSeq": 11
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_brag50qof",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"tick probe\" completed (exit code 0)",
+        "icon": "wrench",
+        "text": "<task-notification>\n<task-id>brag50qof</task-id>\n<tool-use-id>toolu_018mrHgE4rALtXGmrZcj3XDC</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/brag50qof.output</output-file>\n<status>completed</status>\n<summary>Background command \"tick probe\" completed (exit code 0)</summary>\n</task-notification>"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "brag50qof",
+        "toolUseId": "toolu_018mrHgE4rALtXGmrZcj3XDC",
+        "status": "completed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/brag50qof.output"
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:31:44.875Z",
+    "seqStart": 12,
+    "seqEnd": 12,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 12,
+        "endSeq": 12
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_84c15f89-e15c-4bf1-94c5-5d2448b44e10",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"tick probe\" completed (exit code 0)",
+        "icon": "wrench",
+        "text": "<task-notification>\n<task-id>brag50qof</task-id>\n<tool-use-id>toolu_018mrHgE4rALtXGmrZcj3XDC</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/brag50qof.output</output-file>\n<status>completed</status>\n<summary>Background command \"tick probe\" completed (exit code 0)</summary>\n</task-notification>"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "brag50qof",
+        "toolUseId": "toolu_018mrHgE4rALtXGmrZcj3XDC",
+        "status": "completed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/brag50qof.output"
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:31:44.959Z",
+    "seqStart": 13,
+    "seqEnd": 13,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 13,
+        "endSeq": 13
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "noted",
+      "messageId": "53e091f9-ecca-4463-9b6d-5489ee96fc7d"
+    },
+    "timestamp": "2026-10-06T10:31:46.624Z",
+    "seqStart": 14,
+    "seqEnd": 14,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 14,
+        "endSeq": 14
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "user_message",
+      "text": "Next test. Do exactly this:\n1. Bash tool, run_in_background: true, description \"stop probe\": for i in $(seq 1 60); do echo stop-tick $i; sleep 2; done\n2. Then run Bash (foreground) `sleep 5` so a few ticks are written.\n3. Then stop that background task using your tool for stopping/killing a background task (KillShell / TaskStop, whichever you have), passing its task ID.\n4. Then Bash (foreground, NOT run_in_background) with timeout: 4000 and description \"timeout probe\": sleep 20; echo timeout-probe-done\nReport in one short line which tool you used for stopping and what each step returned. When later notifications arrive, reply only \"noted\".",
+      "messageId": "48cea3b5-f8f5-43fa-80d2-417efded00ec"
+    },
+    "timestamp": "2026-10-06T10:31:57.294Z",
+    "seqStart": 15,
+    "seqEnd": 15,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 15,
+        "endSeq": 15
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01EDkMgdjwdo3LxzqjDQ8Srp",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "for i in $(seq 1 60); do echo stop-tick $i; sleep 2; done",
+        "output": "Command running in background with ID: b9h7mtnuu. Output is being written to: /private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/b9h7mtnuu.output. You will be notified when it completes. To check interim output, use Read on that file path."
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:32:00.019Z",
+    "seqStart": 16,
+    "seqEnd": 17,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 16,
+        "endSeq": 17
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_015ogMQEe48FJhRKnGazTkNy",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "sleep 5",
+        "output": "(Bash completed with no output)"
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:32:06.653Z",
+    "seqStart": 18,
+    "seqEnd": 19,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 18,
+        "endSeq": 19
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01HgRBT2wPu8p5U9ZQZvFaFJ",
+      "name": "ToolSearch",
+      "detail": {
+        "type": "unknown",
+        "input": {
+          "query": "select:TaskStop",
+          "max_results": 1
+        },
+        "output": {
+          "output": [
+            {
+              "tool_name": "TaskStop",
+              "type": "tool_reference"
+            }
+          ]
+        }
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:32:08.388Z",
+    "seqStart": 20,
+    "seqEnd": 21,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 20,
+        "endSeq": 21
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01NWmfpa1yjPrAd8LP43TfZW",
+      "name": "TaskStop",
+      "detail": {
+        "type": "unknown",
+        "input": {
+          "task_id": "b9h7mtnuu"
+        },
+        "output": {
+          "output": {
+            "message": "Successfully stopped task: b9h7mtnuu (for i in $(seq 1 60); do echo stop-tick $i; sleep 2; done)",
+            "task_id": "b9h7mtnuu",
+            "task_type": "local_bash",
+            "command": "for i in $(seq 1 60); do echo stop-tick $i; sleep 2; done"
+          }
+        }
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:32:10.224Z",
+    "seqStart": 22,
+    "seqEnd": 23,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 22,
+        "endSeq": 23
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01D7udFGX3wg5h1RZ4QkRzGV",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "sleep 20; echo timeout-probe-done"
+      },
+      "status": "failed",
+      "error": {
+        "type": "tool_result",
+        "content": "Exit code 143\nCommand timed out after 4s",
+        "is_error": true,
+        "tool_use_id": "toolu_01D7udFGX3wg5h1RZ4QkRzGV"
+      }
+    },
+    "timestamp": "2026-10-06T10:32:16.295Z",
+    "seqStart": 24,
+    "seqEnd": 25,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 24,
+        "endSeq": 25
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "Used TaskStop to stop the background task (success). Steps: launch \u2192 background ID b9h7mtnuu; sleep 5 \u2192 completed, no output; TaskStop \u2192 success message; foreground sleep 20 with timeout 4000 \u2192 exit code 143, timed out after 4s (not 4000s/4000ms as expected).",
+      "messageId": "59d16d7d-bfe9-4e69-88dc-7bea3aeec15f"
+    },
+    "timestamp": "2026-10-06T10:32:19.050Z",
+    "seqStart": 26,
+    "seqEnd": 26,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 26,
+        "endSeq": 26
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "user_message",
+      "text": "Last test. Bash tool, run_in_background: true, description \"orphan probe\": for i in $(seq 1 300); do echo orphan-tick $i; sleep 1; done\nThen end your turn immediately replying \"started\". Do not stop it.",
+      "messageId": "b9f51d64-c23d-4543-9626-565475bdb469"
+    },
+    "timestamp": "2026-10-06T10:33:02.143Z",
+    "seqStart": 27,
+    "seqEnd": 27,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 27,
+        "endSeq": 27
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "toolu_01EG3vp9gBDkQewRmA3gC4eR",
+      "name": "Bash",
+      "detail": {
+        "type": "shell",
+        "command": "for i in $(seq 1 300); do echo orphan-tick $i; sleep 1; done",
+        "output": "Command running in background with ID: bxq7gqucc. Output is being written to: /private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/bxq7gqucc.output. You will be notified when it completes. To check interim output, use Read on that file path."
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:33:04.754Z",
+    "seqStart": 28,
+    "seqEnd": 29,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 28,
+        "endSeq": 29
+      }
+    ],
+    "collapsed": [
+      "tool_lifecycle"
+    ]
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "assistant_message",
+      "text": "started",
+      "messageId": "fe4c68d2-6b34-4204-bbb2-587731fa574e"
+    },
+    "timestamp": "2026-10-06T10:33:06.092Z",
+    "seqStart": 30,
+    "seqEnd": 30,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 30,
+        "endSeq": 30
+      }
+    ],
+    "collapsed": []
+  },
+  {
+    "provider": "claude",
+    "item": {
+      "type": "tool_call",
+      "callId": "task_notification_bxq7gqucc",
+      "name": "task_notification",
+      "detail": {
+        "type": "plain_text",
+        "label": "Background command \"orphan probe\" was stopped",
+        "icon": "wrench",
+        "text": "<task-notification>\n<task-id>bxq7gqucc</task-id>\n<tool-use-id>toolu_01EG3vp9gBDkQewRmA3gC4eR</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/bxq7gqucc.output</output-file>\n<status>killed</status>\n<summary>Background command \"orphan probe\" was stopped</summary>\n</task-notification>"
+      },
+      "metadata": {
+        "synthetic": true,
+        "source": "claude_task_notification",
+        "taskId": "bxq7gqucc",
+        "toolUseId": "toolu_01EG3vp9gBDkQewRmA3gC4eR",
+        "status": "killed",
+        "outputFile": "/private/tmp/claude-501/-Users-me-dev-project/11111111-1111-4111-8111-111111111111/tasks/bxq7gqucc.output"
+      },
+      "status": "completed",
+      "error": null
+    },
+    "timestamp": "2026-10-06T10:33:16.597Z",
+    "seqStart": 31,
+    "seqEnd": 31,
+    "sourceSeqRanges": [
+      {
+        "startSeq": 31,
+        "endSeq": 31
+      }
+    ],
+    "collapsed": []
+  }
+]
