@@ -64,6 +64,13 @@ function createStyles(theme: PluginTheme, compact: boolean) {
     },
     tailContent: { padding: compact ? 10 : 12 },
     tailText: { color: colors.foreground, fontFamily: MONOSPACE, fontSize: 12, lineHeight: 17 },
+    fullCommand: {
+      maxHeight: compact ? 160 : 240,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    fullCommandContent: { padding: compact ? 10 : 12, gap: 4 },
+    label: { color: colors.foregroundMuted, fontSize: 11, fontWeight: "600" as const },
   };
 }
 
@@ -165,7 +172,7 @@ function ShellRow({ agentId, agentStatus, shell, now, selected, onSelect, styles
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: selected }}
-        accessibilityLabel={`${title}, ${shellDetail(shell, now)}. ${selected ? "Hide" : "Show"} output`}
+        accessibilityLabel={`${title}, ${shellDetail(shell, now)}. ${selected ? "Hide" : "Show"} command and output`}
         onPress={onSelect}
         style={styles.rowHeader}
       >
@@ -182,7 +189,7 @@ function ShellRow({ agentId, agentStatus, shell, now, selected, onSelect, styles
             {title}
           </Text>
         </View>
-        {shell.description ? (
+        {shell.description && !selected ? (
           <Text style={styles.command} numberOfLines={2}>
             {shell.command}
           </Text>
@@ -194,8 +201,21 @@ function ShellRow({ agentId, agentStatus, shell, now, selected, onSelect, styles
           ) : null}
         </View>
       </Pressable>
+      {selected ? <FullCommand command={shell.command} styles={styles} /> : null}
       {selected ? <OutputTail agentId={agentId} shell={shell} styles={styles} /> : null}
     </View>
+  );
+}
+
+// Outside the row's Pressable, so selecting text to copy it does not collapse the row.
+function FullCommand({ command, styles }: { command: string; styles: Styles }) {
+  return (
+    <ScrollView style={styles.fullCommand} contentContainerStyle={styles.fullCommandContent} nestedScrollEnabled>
+      <Text style={styles.label}>Command</Text>
+      <Text style={styles.tailText} selectable>
+        {command}
+      </Text>
+    </ScrollView>
   );
 }
 
