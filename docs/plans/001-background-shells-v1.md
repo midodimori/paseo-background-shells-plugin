@@ -346,7 +346,8 @@ two sessions at once.
 
 ## Appendix: raw fixtures (captured 2026-10-06)
 
-Verbatim JSON from test agent `1561de0d`, session `11111111-1111-4111-8111-111111111111`.
+Verbatim JSON from test agent `1561de0d`, except that home paths and Claude session IDs
+are anonymized (`/Users/me/...`, `11111111-...`) before publishing.
 Live events are `update.event`; the envelope adds `agentId`, `subscriptionId`,
 `timestamp`, `seq`, `epoch`. History entries are `page.entries[n]`. Copy these into
 `tests/fixtures/` in build step 2.

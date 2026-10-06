@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Paseo plugin that shows Claude Code background shells per agent",
+  "license": "MIT",
   "type": "module",
   "files": [
     "paseo-plugin.json",
