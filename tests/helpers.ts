@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import path from "node:path";
 
 export interface LiveUpdate {
   timestamp: string;
@@ -13,7 +14,7 @@ export interface HistoryEntry {
 }
 
 function readFixture<T>(name: string): T {
-  return JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8")) as T;
+  return JSON.parse(readFileSync(path.join(import.meta.dirname, "fixtures", name), "utf8")) as T;
 }
 
 export const liveUpdates = readFixture<LiveUpdate[]>("live-updates.json");

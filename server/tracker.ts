@@ -105,7 +105,12 @@ export class ShellTracker {
         });
       }),
     );
-    return resolved.sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+    // Running shells first, then newest first.
+    return resolved.sort(
+      (left, right) =>
+        Number(right.status === "running") - Number(left.status === "running") ||
+        right.startedAt.localeCompare(left.startedAt),
+    );
   }
 
   private async footer(agent: TrackedAgent, outputFile: string): Promise<FooterReading | null> {

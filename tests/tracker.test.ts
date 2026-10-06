@@ -95,8 +95,11 @@ test("tracks only Claude agents and replays live updates", async () => {
     b83d7jga2: "failed",
     brag50qof: "completed",
   });
-  // Newest first.
-  assert.equal(listed.shells[0].taskId, "bxq7gqucc");
+  // Running first, then newest first.
+  assert.deepEqual(
+    listed.shells.map((shell) => shell.taskId),
+    ["bxq7gqucc", "b9h7mtnuu", "b83d7jga2", "brag50qof"],
+  );
   assert.deepEqual(await shells.summary(), [{ agentId: AGENT, running: 1, total: 4 }]);
   assert.deepEqual(await shells.list("codex-agent"), { tracked: false, shells: [] });
   await shells.stop();
