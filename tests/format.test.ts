@@ -28,7 +28,7 @@ test("pill label counts running shells, else all shells", () => {
 });
 
 test("pill label flags an idle agent only while shells are running", () => {
-  assert.equal(pillLabel({ running: 1, total: 1 }, true), "Shells · 1 running · agent idle");
+  assert.equal(pillLabel({ running: 1, total: 1 }, true), "1 running · idle");
   assert.equal(pillLabel({ running: 0, total: 2 }, true), "Shells · 2");
 });
 

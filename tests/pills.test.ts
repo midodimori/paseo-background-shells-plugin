@@ -79,7 +79,7 @@ test("the pill warns when the agent goes idle with a running shell", async () =>
   assert.equal(fake.button.current?.icon, "SquareTerminal");
 
   fake.setStatus("idle");
-  assert.equal(fake.button.current?.label, "Shells · 1 running · agent idle");
+  assert.equal(fake.button.current?.label, "1 running · idle");
   assert.equal(fake.button.current?.icon, IDLE_ICON);
   assert.equal(fake.button.current?.visible, true);
 

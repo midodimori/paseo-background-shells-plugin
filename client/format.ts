@@ -13,9 +13,11 @@ export function hasIdleRunningShells(status: string | null | undefined, running:
   return running > 0 && isAgentIdle(status);
 }
 
+// Paseo caps a composer pill at 160 px (about 20 characters of label), so the idle
+// label drops "Shells"; the warning icon and the pill's title carry the rest.
 export function pillLabel(summary: Pick<AgentShellSummary, "running" | "total">, agentIdle = false): string {
   if (summary.running === 0) return `Shells · ${summary.total}`;
-  return `Shells · ${summary.running} running${agentIdle ? " · agent idle" : ""}`;
+  return agentIdle ? `${summary.running} running · idle` : `Shells · ${summary.running} running`;
 }
 
 export function statusLabel(status: ShellStatus): string {

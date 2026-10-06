@@ -10,8 +10,8 @@ with its status (running, completed, failed, stopped, or ended), elapsed time,
 exit code, and a live tail of its output.
 
 Background shells outlive the agent's turn. When an agent is idle with shells
-still running, the pill reads `Shells · 1 running · agent idle` with its icon in
-the warning color, and the panel shows a note. The shells stop when the agent is
+still running, the pill reads `1 running · idle` with its icon in the warning
+color, and the panel shows a note. The shells stop when the agent is
 archived.
 
 **Ask to stop** asks the agent to stop a running shell with its TaskStop tool;
