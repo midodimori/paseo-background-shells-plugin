@@ -1,7 +1,21 @@
 import type { AgentShellSummary, ShellStatus, ShellTask } from "../shared/shell.ts";
 
-export function pillLabel(summary: Pick<AgentShellSummary, "running" | "total">): string {
-  return summary.running > 0 ? `Shells · ${summary.running} running` : `Shells · ${summary.total}`;
+/**
+ * An agent that is not mid-turn but still has a live session. Ask to stop sends
+ * without interrupting in this state; closed sessions have no live shells.
+ */
+export function isAgentIdle(status: string | null | undefined): boolean {
+  return status !== null && status !== undefined && status !== "running" && status !== "closed";
+}
+
+/** Running shells on an idle agent are easy to forget: they outlive the turn. */
+export function hasIdleRunningShells(status: string | null | undefined, running: number): boolean {
+  return running > 0 && isAgentIdle(status);
+}
+
+export function pillLabel(summary: Pick<AgentShellSummary, "running" | "total">, agentIdle = false): string {
+  if (summary.running === 0) return `Shells · ${summary.total}`;
+  return `Shells · ${summary.running} running${agentIdle ? " · agent idle" : ""}`;
 }
 
 export function statusLabel(status: ShellStatus): string {

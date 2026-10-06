@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { formatElapsed, pillLabel, shellDetail, shellElapsed, stopPrompt } from "../client/format.ts";
+import {
+  formatElapsed,
+  hasIdleRunningShells,
+  isAgentIdle,
+  pillLabel,
+  shellDetail,
+  shellElapsed,
+  stopPrompt,
+} from "../client/format.ts";
 import type { ShellTask } from "../shared/shell.ts";
 
 const shell: ShellTask = {
@@ -17,6 +25,24 @@ const shell: ShellTask = {
 test("pill label counts running shells, else all shells", () => {
   assert.equal(pillLabel({ running: 2, total: 3 }), "Shells · 2 running");
   assert.equal(pillLabel({ running: 0, total: 3 }), "Shells · 3");
+});
+
+test("pill label flags an idle agent only while shells are running", () => {
+  assert.equal(pillLabel({ running: 1, total: 1 }, true), "Shells · 1 running · agent idle");
+  assert.equal(pillLabel({ running: 0, total: 2 }, true), "Shells · 2");
+});
+
+test("idle means a live session that is not mid-turn", () => {
+  assert.equal(isAgentIdle("idle"), true);
+  assert.equal(isAgentIdle("error"), true);
+  assert.equal(isAgentIdle("running"), false);
+  assert.equal(isAgentIdle("closed"), false);
+  assert.equal(isAgentIdle(null), false);
+  assert.equal(isAgentIdle(undefined), false);
+  assert.equal(hasIdleRunningShells("idle", 1), true);
+  assert.equal(hasIdleRunningShells("idle", 0), false);
+  assert.equal(hasIdleRunningShells("running", 2), false);
+  assert.equal(hasIdleRunningShells("closed", 1), false);
 });
 
 test("formats elapsed time", () => {

@@ -1,4 +1,5 @@
 import type { PluginClientContext } from "@getpaseo/plugin/client";
+import { IdleShellsIcon } from "./client/idle-icon.tsx";
 import { contributePills } from "./client/pills.ts";
 import { ShellsPanel } from "./client/shells-panel.tsx";
 
@@ -21,5 +22,5 @@ export default function contribute(client: PluginClientContext) {
       openPanel(PANEL_ID);
     },
   });
-  return contributePills(client, PANEL_ID);
+  return contributePills(client, { panelId: PANEL_ID, idleIcon: IdleShellsIcon });
 }

@@ -1,11 +1,12 @@
 import type { PluginTheme } from "@getpaseo/plugin";
 import { type PluginAgentPanelProps, useAgent, usePaseo, useRpc } from "@getpaseo/plugin/client";
+import { Icon } from "@getpaseo/plugin/client/react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { shellsListRpc, shellsTailRpc } from "../shared/contracts.ts";
 import type { ShellStatus, ShellTask } from "../shared/shell.ts";
-import { shellDetail, stopPrompt } from "./format.ts";
+import { hasIdleRunningShells, isAgentIdle, shellDetail, stopPrompt } from "./format.ts";
 
 const LIST_RUNNING_MS = 2000;
 const LIST_IDLE_MS = 10000;
@@ -28,6 +29,17 @@ function createStyles(theme: PluginTheme, compact: boolean) {
     title: { color: colors.foreground, fontSize: compact ? 17 : 19, fontWeight: "600" as const },
     muted: { color: colors.foregroundMuted, fontSize: 13 },
     error: { color: colors.statusDanger, fontSize: 13 },
+    note: {
+      flexDirection: "row" as const,
+      gap: 8,
+      alignItems: "flex-start" as const,
+      padding: compact ? 10 : 12,
+      borderWidth: 1,
+      borderColor: colors.statusWarning,
+      borderRadius: 8,
+      backgroundColor: colors.surface1,
+    },
+    noteText: { flex: 1, color: colors.foreground, fontSize: 13, lineHeight: 18 },
     row: {
       borderWidth: 1,
       borderColor: colors.border,
@@ -115,7 +127,8 @@ export function ShellsPanel({ theme, layout, agentId }: PluginAgentPanelProps) {
       query.state.data?.shells.some((shell) => shell.status === "running") ? LIST_RUNNING_MS : LIST_IDLE_MS,
   });
   const shells = list.data?.shells ?? [];
-  const anyRunning = shells.some((shell) => shell.status === "running");
+  const running = shells.filter((shell) => shell.status === "running").length;
+  const anyRunning = running > 0;
   const now = useNow(anyRunning);
   const selectedId =
     selected === undefined
@@ -136,7 +149,17 @@ export function ShellsPanel({ theme, layout, agentId }: PluginAgentPanelProps) {
       ) : shells.length === 0 ? (
         <Text style={styles.muted}>This agent has not started any background shells.</Text>
       ) : (
-        shells.map((shell) => (
+        <>
+          {hasIdleRunningShells(agent?.status, running) ? (
+            <View style={styles.note} accessibilityRole="alert">
+              <Icon name="TriangleAlert" size={16} color={theme.colors.statusWarning} />
+              <Text style={styles.noteText}>
+                The agent is idle, but {running === 1 ? "this shell is" : "these shells are"} still running. They
+                stop when the agent is archived.
+              </Text>
+            </View>
+          ) : null}
+          {shells.map((shell) => (
           <ShellRow
             key={shell.taskId}
             agentId={agentId}
@@ -148,7 +171,8 @@ export function ShellsPanel({ theme, layout, agentId }: PluginAgentPanelProps) {
             styles={styles}
             theme={theme}
           />
-        ))
+          ))}
+        </>
       )}
     </ScrollView>
   );
@@ -250,7 +274,7 @@ function AskToStop({ agentId, agentStatus, shell, styles }: AskToStopProps) {
       </View>
     );
   }
-  const busy = agentStatus === "running";
+  const busy = !isAgentIdle(agentStatus);
   const label = confirming ? "Interrupt agent and stop?" : busy ? "Interrupt to stop" : "Ask to stop";
   return (
     <>

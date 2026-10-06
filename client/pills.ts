@@ -1,29 +1,45 @@
-import type { PluginButtonRegistration, PluginClientContext } from "@getpaseo/plugin/client";
+import type { PluginButtonIcon, PluginButtonRegistration, PluginClientContext } from "@getpaseo/plugin/client";
 import { shellsSummaryRpc } from "../shared/contracts.ts";
 import type { AgentShellSummary } from "../shared/shell.ts";
-import { pillLabel } from "./format.ts";
+import { hasIdleRunningShells, pillLabel } from "./format.ts";
 
 const PILL_ID = "background-shells";
+const ICON = "SquareTerminal";
+const TITLE = "Background shells";
+const IDLE_TITLE = "Background shells still running while the agent is idle";
 const POLL_RUNNING_MS = 2000;
 const POLL_IDLE_MS = 5000;
+
+export interface PillOptions {
+  panelId: string;
+  // Passed in so this module stays free of React Native and testable under Node.
+  idleIcon: PluginButtonIcon;
+}
 
 interface Pill {
   workspaceId: string;
   registration: PluginButtonRegistration;
+  agentStatus: string | null;
   label: string;
   visible: boolean;
+  warning: boolean;
 }
 
 interface DirectoryAgent {
   id: string;
   provider: string;
+  status?: string | null;
   workspaceId?: string | null;
   archivedAt?: string | null;
 }
 
-/** One hidden pill per Claude agent, shown with a count once the agent has shells. */
-export function contributePills(client: PluginClientContext, panelId: string): () => void {
+/**
+ * One hidden pill per Claude agent, shown with a count once the agent has shells.
+ * An idle agent with running shells gets a warning icon and label.
+ */
+export function contributePills(client: PluginClientContext, options: PillOptions): () => void {
   const pills = new Map<string, Pill>();
+  let summaries = new Map<string, AgentShellSummary>();
   const lifetime = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
@@ -33,13 +49,35 @@ export function contributePills(client: PluginClientContext, panelId: string): (
     pills.delete(agentId);
   };
 
+  const render = (agentId: string) => {
+    const pill = pills.get(agentId);
+    if (!pill) return;
+    const summary = summaries.get(agentId);
+    const visible = summary !== undefined && summary.total > 0;
+    const warning = summary !== undefined && hasIdleRunningShells(pill.agentStatus, summary.running);
+    const label = summary ? pillLabel(summary, warning) : pill.label;
+    if (visible === pill.visible && label === pill.label && warning === pill.warning) return;
+    pill.registration.update({
+      visible,
+      label,
+      icon: warning ? options.idleIcon : ICON,
+      title: warning ? IDLE_TITLE : TITLE,
+    });
+    Object.assign(pill, { visible, label, warning });
+  };
+
   const register = (agent: DirectoryAgent) => {
     if (stopped) return;
     if (agent.provider !== "claude" || !agent.workspaceId || agent.archivedAt) {
       remove(agent.id);
       return;
     }
-    if (pills.get(agent.id)?.workspaceId === agent.workspaceId) return;
+    const existing = pills.get(agent.id);
+    if (existing?.workspaceId === agent.workspaceId) {
+      existing.agentStatus = agent.status ?? null;
+      render(agent.id);
+      return;
+    }
     remove(agent.id);
     const workspaceId = agent.workspaceId;
     const agentId = agent.id;
@@ -48,32 +86,27 @@ export function contributePills(client: PluginClientContext, panelId: string): (
       workspaceId,
       agentId,
       button: {
-        title: "Background shells",
-        icon: "SquareTerminal",
+        title: TITLE,
+        icon: ICON,
         label: "Shells",
         visible: false,
         behavior: {
           kind: "action",
           onPress() {
-            client.openPanel(panelId, { workspaceId, agentId });
+            client.openPanel(options.panelId, { workspaceId, agentId });
           },
         },
       },
     });
-    pills.set(agentId, { workspaceId, registration, label: "Shells", visible: false });
-  };
-
-  const apply = (summaries: readonly AgentShellSummary[]) => {
-    const byAgent = new Map(summaries.map((summary) => [summary.agentId, summary]));
-    for (const [agentId, pill] of pills) {
-      const summary = byAgent.get(agentId);
-      const visible = summary !== undefined && summary.total > 0;
-      const label = summary ? pillLabel(summary) : pill.label;
-      if (visible === pill.visible && label === pill.label) continue;
-      pill.registration.update({ visible, label });
-      pill.visible = visible;
-      pill.label = label;
-    }
+    pills.set(agentId, {
+      workspaceId,
+      registration,
+      agentStatus: agent.status ?? null,
+      label: "Shells",
+      visible: false,
+      warning: false,
+    });
+    render(agentId);
   };
 
   const poll = async () => {
@@ -81,7 +114,8 @@ export function contributePills(client: PluginClientContext, panelId: string): (
     try {
       const { agents } = await client.rpc(shellsSummaryRpc, {});
       if (stopped) return;
-      apply(agents);
+      summaries = new Map(agents.map((summary) => [summary.agentId, summary]));
+      for (const agentId of pills.keys()) render(agentId);
       running = agents.some((summary) => summary.running > 0);
     } catch (error) {
       if (!stopped) console.warn("Background shells summary failed", error);
