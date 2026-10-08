@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { applyTimelineItem, createAgentShells, resolveShell, type AgentShells } from "../server/reduce.ts";
 import { historyEntries, liveItems, timeoutEntries } from "./helpers.ts";
 
-const open = { footer: null, footerAt: null, sessionEnded: false };
+const open = { footer: null, footerAt: null, outputMissing: false, sessionEnded: false };
 
 function statuses(state: AgentShells, context = open) {
   return Object.fromEntries(
@@ -99,15 +99,15 @@ test("resolve: footer settles a shell without a notification", () => {
   assert.ok(orphan);
   const at = "2026-10-06T10:33:17.000Z";
   assert.deepEqual(
-    pick(resolveShell(orphan, { footer: { kind: "killed" }, footerAt: at, sessionEnded: false })),
+    pick(resolveShell(orphan, { footer: { kind: "killed" }, footerAt: at, outputMissing: false, sessionEnded: false })),
     ["stopped", null, at],
   );
   assert.deepEqual(
-    pick(resolveShell(orphan, { footer: { kind: "exited", exitCode: 0 }, footerAt: at, sessionEnded: false })),
+    pick(resolveShell(orphan, { footer: { kind: "exited", exitCode: 0 }, footerAt: at, outputMissing: false, sessionEnded: false })),
     ["completed", 0, at],
   );
   assert.deepEqual(
-    pick(resolveShell(orphan, { footer: { kind: "exited", exitCode: 2 }, footerAt: at, sessionEnded: false })),
+    pick(resolveShell(orphan, { footer: { kind: "exited", exitCode: 2 }, footerAt: at, outputMissing: false, sessionEnded: false })),
     ["failed", 2, at],
   );
 });
@@ -117,11 +117,15 @@ test("resolve: an ended session with no other signal shows ended, not running", 
   for (const { item, timestamp } of liveItems()) applyTimelineItem(state, item, timestamp);
   const orphan = state.shells.get("bxq7gqucc");
   assert.ok(orphan);
-  assert.deepEqual(pick(resolveShell(orphan, { footer: null, footerAt: null, sessionEnded: true })), [
-    "ended",
-    null,
-    null,
-  ]);
+  assert.deepEqual(pick(resolveShell(orphan, { ...open, sessionEnded: true })), ["ended", null, null]);
+});
+
+test("resolve: a deleted output file ends a shell the open session never heard back from", () => {
+  const state = createAgentShells();
+  for (const { item, timestamp } of liveItems()) applyTimelineItem(state, item, timestamp);
+  const orphan = state.shells.get("bxq7gqucc");
+  assert.ok(orphan);
+  assert.deepEqual(pick(resolveShell(orphan, { ...open, outputMissing: true })), ["ended", null, null]);
 });
 
 function pick(shell: ReturnType<typeof resolveShell>) {

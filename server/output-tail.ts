@@ -1,4 +1,4 @@
-import { open, realpath } from "node:fs/promises";
+import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import type { OutputFooter } from "../shared/shell.ts";
 import { parseOutputFooter } from "./parse.ts";
@@ -44,6 +44,20 @@ export async function resolveOutputPath(file: string, root: string): Promise<str
   if (path.extname(resolved) !== ".output") return null;
   if (path.basename(path.dirname(resolved)) !== "tasks") return null;
   return resolved;
+}
+
+/**
+ * True when the output file is gone, as after a reboot or Claude Code's cleanup of an
+ * old session. Its shell cannot still be writing to it.
+ */
+export async function isOutputMissing(file: string): Promise<boolean> {
+  if (!path.isAbsolute(file)) return false;
+  try {
+    await lstat(file);
+    return false;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "ENOENT";
+  }
 }
 
 /** Reads at most maxBytes from the end of a task output file. */

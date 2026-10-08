@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promis
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
-import { readOutputTail, resolveOutputPath } from "../server/output-tail.ts";
+import { isOutputMissing, readOutputTail, resolveOutputPath } from "../server/output-tail.ts";
 
 let base: string;
 let root: string;
@@ -69,4 +69,11 @@ test("rejects paths outside the root, symlink escapes, and other files", async (
 test("no root means nothing is readable", async () => {
   const tail = await readOutputTail(path.join(tasks, "done.output"), 1024, null);
   assert.equal(tail.available, false);
+});
+
+test("only a nonexistent absolute path counts as missing", async () => {
+  assert.equal(await isOutputMissing(path.join(tasks, "missing.output")), true);
+  assert.equal(await isOutputMissing(path.join(base, "gone-session", "tasks", "x.output")), true);
+  assert.equal(await isOutputMissing(path.join(tasks, "running.output")), false);
+  assert.equal(await isOutputMissing("relative/tasks/missing.output"), false);
 });

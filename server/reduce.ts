@@ -76,6 +76,8 @@ export function applyTimelineItem(state: AgentShells, item: unknown, timestamp: 
 export interface ResolveContext {
   footer: OutputFooter | null;
   footerAt: string | null;
+  // The output file is gone, so the shell's session was cleaned up or the machine rebooted.
+  outputMissing: boolean;
   // The agent's session is gone, so a shell with no recorded end cannot still be running.
   sessionEnded: boolean;
 }
@@ -102,7 +104,7 @@ export function resolveShell(shell: ShellRecord, context: ResolveContext): Shell
       context.footer.kind === "killed" ? "stopped" : footerExit === 0 ? "completed" : "failed";
     return { ...base, status, exitCode: footerExit, endedAt: context.footerAt };
   }
-  if (context.sessionEnded) return { ...base, status: "ended", exitCode: null, endedAt: null };
+  if (context.sessionEnded || context.outputMissing) return { ...base, status: "ended", exitCode: null, endedAt: null };
   return { ...base, status: "running", exitCode: null, endedAt: null };
 }
 

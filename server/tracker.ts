@@ -13,7 +13,8 @@ export interface FooterReading {
 }
 
 export interface TrackerOptions {
-  readFooter(outputFile: string): Promise<FooterReading | null>;
+  /** "missing" when the output file no longer exists. */
+  readFooter(outputFile: string): Promise<FooterReading | "missing" | null>;
   /** How long list() waits for an agent's first history load. */
   loadTimeoutMs?: number;
 }
@@ -98,9 +99,11 @@ export class ShellTracker {
     const resolved = await Promise.all(
       shells.map(async (shell) => {
         const reading = shell.end ? null : await this.footer(agent, shell.outputFile);
+        const footer = reading === "missing" ? null : reading;
         return resolveShell(shell, {
-          footer: reading?.footer ?? null,
-          footerAt: reading?.at ?? null,
+          footer: footer?.footer ?? null,
+          footerAt: footer?.at ?? null,
+          outputMissing: reading === "missing",
           sessionEnded: agent.sessionEnded,
         });
       }),
@@ -113,11 +116,11 @@ export class ShellTracker {
     );
   }
 
-  private async footer(agent: TrackedAgent, outputFile: string): Promise<FooterReading | null> {
+  private async footer(agent: TrackedAgent, outputFile: string): Promise<FooterReading | "missing" | null> {
     const cached = agent.footers.get(outputFile);
     if (cached) return cached;
     const reading = await this.options.readFooter(outputFile).catch(() => null);
-    if (reading) agent.footers.set(outputFile, reading);
+    if (reading && reading !== "missing") agent.footers.set(outputFile, reading);
     return reading;
   }
 

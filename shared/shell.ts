@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-// "ended" means the shell stopped with the agent session and left no exit status.
+// "ended" means the shell stopped with the agent session, or its output file was deleted,
+// and left no exit status.
 export const shellStatusSchema = z.enum(["running", "completed", "failed", "stopped", "ended"]);
 
 export type ShellStatus = z.infer<typeof shellStatusSchema>;

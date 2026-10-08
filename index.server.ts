@@ -1,16 +1,20 @@
 import type { PluginServerContext } from "@getpaseo/plugin/server";
-import { claudeTasksRoot, readOutputTail } from "./server/output-tail.ts";
+import { claudeTasksRoot, isOutputMissing, readOutputTail } from "./server/output-tail.ts";
 import { ShellTracker } from "./server/tracker.ts";
 import { DEFAULT_TAIL_BYTES, shellsListRpc, shellsSummaryRpc, shellsTailRpc } from "./shared/contracts.ts";
 
 const FOOTER_BYTES = 128;
 
 export default function contribute(server: PluginServerContext) {
-  const root = claudeTasksRoot();
+  // /tmp/claude-<uid> appears when Claude Code first runs after a reboot, which can be
+  // after the plugin loads, so keep resolving until it exists.
+  let root: string | null = null;
+  const tasksRoot = async () => (root ??= await claudeTasksRoot());
   const tracker = new ShellTracker({
     async readFooter(outputFile) {
-      const tail = await readOutputTail(outputFile, FOOTER_BYTES, await root);
-      return tail.footer ? { footer: tail.footer, at: tail.modifiedAt } : null;
+      const tail = await readOutputTail(outputFile, FOOTER_BYTES, await tasksRoot());
+      if (tail.footer) return { footer: tail.footer, at: tail.modifiedAt };
+      return !tail.available && (await isOutputMissing(outputFile)) ? "missing" : null;
     },
   });
 
@@ -31,7 +35,7 @@ export default function contribute(server: PluginServerContext) {
     const { modifiedAt: _modifiedAt, ...tail } = await readOutputTail(
       outputFile,
       maxBytes ?? DEFAULT_TAIL_BYTES,
-      await root,
+      await tasksRoot(),
     );
     return tail;
   });

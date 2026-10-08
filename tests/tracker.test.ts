@@ -64,7 +64,7 @@ function fakePaseo(initial: FakeAgent[], history: unknown[] = []) {
   };
 }
 
-function tracker(footers: Record<string, FooterReading> = {}) {
+function tracker(footers: Record<string, FooterReading | "missing"> = {}) {
   return new ShellTracker({
     async readFooter(outputFile) {
       const id = outputFile.split("/").pop()?.replace(".output", "") ?? "";
@@ -142,6 +142,17 @@ test("a footer settles a running shell; a closed session ends it", async () => {
   const after = (await ended.list(AGENT)).shells.find((shell) => shell.taskId === "bxq7gqucc");
   assert.equal(after?.status, "ended");
   await ended.stop();
+});
+
+test("a shell whose output file is gone stops counting as running", async () => {
+  const fake = fakePaseo([{ id: AGENT, provider: "claude", status: "idle" }]);
+  const shells = tracker({ bxq7gqucc: "missing" });
+  await shells.start(fake.paseo);
+  for (const update of liveUpdates) fake.emit(AGENT, { agentId: AGENT, ...update });
+  const stale = (await shells.list(AGENT)).shells.find((shell) => shell.taskId === "bxq7gqucc");
+  assert.equal(stale?.status, "ended");
+  assert.deepEqual(await shells.summary(), [{ agentId: AGENT, running: 0, total: 4 }]);
+  await shells.stop();
 });
 
 test("archiving or removing an agent releases its timeline", async () => {
